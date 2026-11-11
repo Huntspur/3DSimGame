@@ -4,7 +4,7 @@ using System.Collections.Generic;
 public class PlacementSystem : MonoBehaviour
 {
     [SerializeField]
-    GameObject mouseIndicator, cellIndicator;
+    GameObject mouseIndicator;
 
     [SerializeField]
     private InputManager inputManager;
@@ -21,17 +21,18 @@ public class PlacementSystem : MonoBehaviour
 
     private GridData floorData, furnitureData;
 
-    private Renderer previewRenderer;
+    [SerializeField]
+    private PreviewSystem previewSystem;
 
     private List<GameObject> placedGameObjects = new();
    
+    private Vector3Int lastDetectedPosition = Vector3Int.zero;
 
     private void Start()
     {
         StopPlacement();
         floorData = new();
         furnitureData = new();
-        previewRenderer = cellIndicator.GetComponentInChildren<Renderer>();
     }
 
     public void StartPlacement(int objectIndex) //called when the player clicks on a button to place an object in the grid. The objectIndex parameter is used to identify which object the player wants to place. This method sets up the necessary variables and enables the grid visualisation and cell indicator, allowing the player to see where they can place the object. It also subscribes to the OnClicked and OnExit events of the inputManager, so that when the player clicks or exits the placement mode, the appropriate methods are called.
@@ -46,7 +47,7 @@ public class PlacementSystem : MonoBehaviour
 
         //enable the grid visualisation and cell indicator, allowing the player to see where they can place the object
         gridVisualisation.SetActive(true);
-        cellIndicator.SetActive(true);
+        previewSystem.StartShowingPlacementPreview(data.objectsData[selectedObjectIndex].prefab, data.objectsData[selectedObjectIndex].Size);
         inputManager.OnClicked += PlaceStructure;
         inputManager.OnExit += StopPlacement;
     }
@@ -55,9 +56,10 @@ public class PlacementSystem : MonoBehaviour
     {
         selectedObjectIndex = -1;
         gridVisualisation.SetActive(false);
-        cellIndicator.SetActive(false);
+        previewSystem.StopShowingPreview();
         inputManager.OnClicked -= PlaceStructure;
         inputManager.OnExit -= StopPlacement;
+        lastDetectedPosition = Vector3Int.zero;
     }
 
     private void PlaceStructure()//called when the player clicks on the grid to place an object. This method checks if the player is currently placing an object and if the mouse pointer is not over a UI element. If both conditions are met, it gets the mouse position and converts it to a grid position using the WorldToCell method of the grid. It then instantiates a new object based on the selectedObjectIndex and sets its position to the grid position using the CellToWorld method of the grid.
@@ -80,14 +82,16 @@ public class PlacementSystem : MonoBehaviour
         newObj.transform.position = grid.CellToWorld(gridPosition);
 
         placedGameObjects.Add(newObj);
-        GridData selectedData = data.objectsData[selectedObjectIndex].ID == 0 ? floorData : furnitureData;
+        GridData selectedData = data.objectsData[selectedObjectIndex].ID == 0 ? furnitureData : furnitureData;
         selectedData.AddObjectAt(gridPosition, data.objectsData[selectedObjectIndex].Size, data.objectsData[selectedObjectIndex].ID, placedGameObjects.Count - 1);
+
+        previewSystem.UpdatePreviewPosition(grid.CellToWorld(gridPosition), false);
 
     }
 
     private bool CheckPlacementValidity(Vector3Int gridPosition, int selectedObjectIndex)
     {
-        GridData selectedData = data.objectsData[selectedObjectIndex].ID == 0 ? floorData : furnitureData;
+        GridData selectedData = data.objectsData[selectedObjectIndex].ID == 0 ? furnitureData : furnitureData;
         // Add placement validation logic here
         return selectedData.CanPlaceObjectAt(gridPosition, data.objectsData[selectedObjectIndex].Size);
     }
@@ -101,11 +105,15 @@ public class PlacementSystem : MonoBehaviour
         //get the mouse position and convert it to a grid position using the WorldToCell method of the grid. Then, set the position of the mouse indicator and cell indicator to the mouse position and grid position, respectively.
         Vector3 mousePos = inputManager.GetSelectMapPosition();
         Vector3Int gridPosition = grid.WorldToCell(mousePos);
+        if(lastDetectedPosition != gridPosition)
+        {
+            bool placementValidity = CheckPlacementValidity(gridPosition, selectedObjectIndex);
 
-        bool placementValidity = CheckPlacementValidity(gridPosition, selectedObjectIndex);
-        previewRenderer.material.color = placementValidity ? Color.white : Color.red;
+            mouseIndicator.transform.position = mousePos;
+            previewSystem.UpdatePreviewPosition(grid.CellToWorld(gridPosition), placementValidity);
+                    lastDetectedPosition = gridPosition;
 
-        mouseIndicator.transform.position = mousePos;
-        cellIndicator.transform.position = grid.CellToWorld(gridPosition);
+        }
+       
     }
 }
