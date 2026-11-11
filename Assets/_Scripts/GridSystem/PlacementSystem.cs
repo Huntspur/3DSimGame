@@ -28,6 +28,10 @@ public class PlacementSystem : MonoBehaviour
    
     private Vector3Int lastDetectedPosition = Vector3Int.zero;
 
+    [SerializeField] private LayerMask wallLayer;          
+    [SerializeField] private float wallCheckHalfHeight = 1f; 
+    [SerializeField] private float wallCheckPadding = 0.05f; 
+
     private void Start()
     {
         StopPlacement();
@@ -91,11 +95,29 @@ public class PlacementSystem : MonoBehaviour
 
     private bool CheckPlacementValidity(Vector3Int gridPosition, int selectedObjectIndex)
     {
-        GridData selectedData = data.objectsData[selectedObjectIndex].ID == 0 ? furnitureData : furnitureData;
-        // Add placement validation logic here
-        return selectedData.CanPlaceObjectAt(gridPosition, data.objectsData[selectedObjectIndex].Size);
-    }
+        Vector2Int size = data.objectsData[selectedObjectIndex].Size;
 
+        if (IsOverlappingWall(gridPosition, size))     
+        { 
+            return false;
+        }
+
+        GridData selectedData = data.objectsData[selectedObjectIndex].ID == 0 ? furnitureData : furnitureData;
+        return selectedData.CanPlaceObjectAt(gridPosition, size);
+    }
+    private bool IsOverlappingWall(Vector3Int gridPosition, Vector2Int size)
+    {
+        Vector3 cellSize = grid.cellSize;
+        Vector3 origin = grid.CellToWorld(gridPosition);
+
+        float halfX = size.x * cellSize.x * 0.5f;
+        float halfZ = size.y * cellSize.z * 0.5f;
+
+        Vector3 center = origin + new Vector3(halfX, wallCheckHalfHeight, halfZ);
+        Vector3 halfExtents = new Vector3(halfX - wallCheckPadding, wallCheckHalfHeight, halfZ - wallCheckPadding);
+
+        return Physics.CheckBox(center, halfExtents, Quaternion.identity, wallLayer);
+    }
     private void Update()
     {
         if(selectedObjectIndex < 0)
