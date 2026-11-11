@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ad89df5800a038942a412f29465cfb38, type: 3}
+  m_Name: Database
+  m_EditorClassIdentifier: Assembly-CSharp::ObjectsDatabaseSO
+  objectsData:
+  - <objectName>k__BackingField: ArcadeMachine1
+    <ID>k__BackingField: 0
+    <Size>k__BackingField: {x: 1, y: 1}
+    <prefab>k__BackingField: {fileID: 3130399645350525410, guid: ac8d40cf491726147898faaf96340232, type: 3}
+  - <objectName>k__BackingField: ArcadeMachine2
+    <ID>k__BackingField: 1
+    <Size>k__BackingField: {x: 1, y: 1}
+    <prefab>k__BackingField: {fileID: 3130399645350525410, guid: 8403e9b073fb59d43bddef10cc942e2e, type: 3}
+  - <objectName>k__BackingField: PinballMachine1
+    <ID>k__BackingField: 2
+    <Size>k__BackingField: {x: 2, y: 1}
+    <prefab>k__BackingField: {fileID: 3130399645350525410, guid: 8f16c96ee25c7e147b7f95d5fcc9fcef, type: 3}
