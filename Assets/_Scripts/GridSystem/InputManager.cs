@@ -28,10 +28,10 @@ public class InputManager : MonoBehaviour
 
     }
 
-    public bool IsPointerOverUI() => UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject();
-   
+    public bool IsPointerOverUI() => UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject(); //check if the mouse is over a UI element, so we dont place objects when clicking on UI buttons
 
-    public Vector3 GetSelecMapPosition() 
+
+    public Vector3 GetSelectMapPosition() //get the mouse position in world space, so we can place objects on the grid based on the mouse position
     {
         Vector3 mousePos = Input.mousePosition;
         mousePos.z = sceneCamera.nearClipPlane;// so we dont select objects that arent rendered by cam 
